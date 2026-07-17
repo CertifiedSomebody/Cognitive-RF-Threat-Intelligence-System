@@ -1,0 +1,24 @@
+# Core Libraries
+numpy
+pandas
+
+# Machine Learning
+scikit-learn
+tensorflow
+tflite-runtime
+
+# Signal Processing
+scipy
+
+# SDR
+pyrtlsdr
+
+# Dashboard
+flask
+
+# Visualization
+matplotlib
+plotly
+
+# Testing
+pytest

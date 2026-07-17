@@ -59,7 +59,7 @@ from Dashboard.dashboard import (
 from Edge.edge_ai import (
     get_runtime_information
 )
-
+from Docs.generate_analytics import generate_analytics
 
 class CognitiveRFSystem:
     """
@@ -272,6 +272,8 @@ class CognitiveRFSystem:
                 "Processing Complete."
             )
             print("=" * 80)
+
+            generate_analytics()
 
         except KeyboardInterrupt:
 
