@@ -1,22 +1,170 @@
-from FeatureExtraction.feature_extractor import extract_features
+"""
+threat_engine.py
+
+RF Threat Assessment Engine.
+
+Responsibilities:
+- Calculate RF threat scores.
+- Determine threat levels.
+- Provide explainable threat decisions.
+- Aggregate intelligence from:
+    - Feature Extraction
+    - RF Classification
+    - Anomaly Detection
+"""
+
+from typing import Dict, List
 
 
-def calculate_threat(signal_or_features):
+class ThreatEngine:
+    """
+    Cognitive RF Threat Assessment Engine.
+    """
 
-    features = signal_or_features
+    def determine_level(
+        self,
+        score: int
+    ) -> str:
+        """
+        Determine threat level.
+        """
 
-    if not {"is_unknown", "high_power", "frequency"}.issubset(features.keys()):
-        features = extract_features(signal_or_features)
+        if score >= 8:
+            return "HIGH"
 
-    score = 0
+        if score >= 5:
+            return "MEDIUM"
 
-    if features.get("is_unknown", False):
-        score += 5
+        if score >= 2:
+            return "LOW"
 
-    if features.get("high_power", False):
-        score += 3
+        return "INFO"
 
-    if features.get("frequency", 0) > 2480:
-        score += 2
+    def calculate(
+        self,
+        features: Dict,
+        classification: Dict,
+        anomaly: Dict
+    ) -> Dict:
+        """
+        Calculate RF threat score.
+        """
 
-    return min(score, 10)
+        score = 0
+        reasons: List[str] = []
+
+        # -----------------------------------------
+        # Unknown Device
+        # -----------------------------------------
+
+        if features["is_unknown"]:
+
+            score += 4
+
+            reasons.append(
+                "Unknown RF device detected."
+            )
+
+        # -----------------------------------------
+        # High Power
+        # -----------------------------------------
+
+        if features["high_power"]:
+
+            score += 2
+
+            reasons.append(
+                "High signal power observed."
+            )
+
+        # -----------------------------------------
+        # Suspicious Frequency
+        # -----------------------------------------
+
+        if features["frequency"] > 2480:
+
+            score += 1
+
+            reasons.append(
+                "Operating in suspicious frequency range."
+            )
+
+        # -----------------------------------------
+        # AI Confidence
+        # -----------------------------------------
+
+        if (
+            classification["predicted_class"]
+            == "Unknown"
+        ):
+
+            score += 1
+
+            reasons.append(
+                "Classifier unable to identify signal."
+            )
+
+        # -----------------------------------------
+        # Anomaly Detection
+        # -----------------------------------------
+
+        if anomaly["is_anomalous"]:
+
+            score += 2
+
+            reasons.append(
+                "Anomalous RF behavior detected."
+            )
+
+        score = min(score, 10)
+
+        return {
+
+            "threat_score":
+                score,
+
+            "threat_level":
+                self.determine_level(
+                    score
+                ),
+
+            "reasons":
+                reasons
+        }
+
+
+# ------------------------------------------------------
+# Singleton Instance
+# ------------------------------------------------------
+
+threat_engine = ThreatEngine()
+
+
+# ------------------------------------------------------
+# Public API
+# ------------------------------------------------------
+
+def calculate_threat(
+    features: Dict,
+    classification: Dict,
+    anomaly: Dict
+) -> Dict:
+    """
+    Calculate RF threat.
+
+    Parameters
+    ----------
+    features : dict
+    classification : dict
+    anomaly : dict
+
+    Returns
+    -------
+    dict
+    """
+
+    return threat_engine.calculate(
+        features,
+        classification,
+        anomaly
+    )
